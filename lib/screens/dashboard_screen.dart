@@ -6,19 +6,27 @@ import '../widgets/common.dart';
 import '../models/money_record.dart';
 import '../models/plan_item.dart';
 import '../models/shopping_item.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'planner_screen.dart';
 import 'shopping_screen.dart';
 
-/// 今日概览页 —— 顶部「今天要处理」，下方各模块摘要
+/// 今日概览页 —— 顶部「今天要处理」，下方各模块摘要；右上角为设置入口
 class DashboardScreen extends StatelessWidget {
   final AppState state;
   const DashboardScreen({super.key, required this.state});
 
   String get _today => DateFormat('yyyy-MM-dd').format(DateTime.now());
-  String get _todayLabel => DateFormat('M月d日 EEEE').format(DateTime.now());
+
+  /// 顶部日期副标题：zh 用「9月4日 星期五」，en 用「Fri, Sep 4」
+  String _todayLabel(BuildContext context) {
+    final zh = Localizations.localeOf(context).languageCode == 'zh';
+    return DateFormat(zh ? 'M月d日 EEEE' : 'EEE, MMM d', zh ? 'zh' : 'en')
+        .format(DateTime.now());
+  }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // 计算今日数据
     final todayMoney = state.moneyRecords
         .where((r) => r.date == _today)
@@ -43,13 +51,16 @@ class DashboardScreen extends StatelessWidget {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('日常集'),
-            Text(_todayLabel,
+            Text(l10n.appName),
+            Text(_todayLabel(context),
                 style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary, fontWeight: FontWeight.w400)),
           ],
         ),
         actions: [
-          IconButton(icon: const Icon(Icons.more_horiz), onPressed: () => _showMenu(context)),
+          IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              tooltip: l10n.settingsTitle,
+              onPressed: () => _showSettings(context)),
         ],
       ),
       body: ListView(
@@ -66,35 +77,98 @@ class DashboardScreen extends StatelessWidget {
           ),
           // 今日数字
           Row(children: [
-            Expanded(child: _StatCard(label: '今日支出', value: fmtMoney(todayMoney.out), color: AppTheme.expense)),
+            Expanded(child: _StatCard(label: l10n.dashStatExpense, value: fmtMoney(todayMoney.out), color: AppTheme.expense)),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(label: '今日收入', value: fmtMoney(todayMoney.in_), color: AppTheme.income)),
+            Expanded(child: _StatCard(label: l10n.dashStatIncome, value: fmtMoney(todayMoney.in_), color: AppTheme.income)),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(label: '习惯完成', value: '$todayHabitsDone/${state.habits.length}', color: AppTheme.primary)),
+            Expanded(child: _StatCard(label: l10n.dashStatHabit, value: '$todayHabitsDone/${state.habits.length}', color: AppTheme.primary)),
           ]),
           const SizedBox(height: 8),
           // 模块摘要入口
-          const SectionTitle('快捷入口'),
+          SectionTitle(l10n.dashQuick),
           _ModuleGrid(state: state),
         ],
       ),
     );
   }
 
-  void _showMenu(BuildContext context) {
+  /// 设置面板：语言切换 / 数据存储 / 关于
+  void _showSettings(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
       context: context,
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => SafeArea(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          ListTile(leading: const Icon(Icons.storage), title: const Text('数据存储'),
-            subtitle: const Text('当前：本地存储', style: TextStyle(fontSize: 12)),
-            onTap: () => Navigator.pop(ctx)),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
+            child: Row(children: [
+              Text(l10n.settingsTitle,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            ]),
+          ),
+          ListTile(
+            leading: const Icon(Icons.language),
+            title: Text(l10n.settingsLanguage),
+            subtitle: Text(state.isZh ? '简体中文' : 'English', style: const TextStyle(fontSize: 12)),
+            onTap: () => _showLanguagePicker(ctx, l10n),
+          ),
           const Divider(height: 1),
-          ListTile(leading: const Icon(Icons.info_outline), title: const Text('关于'),
-            subtitle: const Text('日常集 · 生活工作台 v1.0.0', style: TextStyle(fontSize: 12)),
-            onTap: () => Navigator.pop(ctx)),
+          ListTile(
+            leading: const Icon(Icons.storage),
+            title: Text(l10n.settingsStorage),
+            subtitle: Text(l10n.settingsStorageSub, style: const TextStyle(fontSize: 12)),
+            onTap: () => Navigator.pop(ctx),
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.info_outline),
+            title: Text(l10n.settingsAbout),
+            subtitle: Text('${l10n.appNameFull} v1.0.0', style: const TextStyle(fontSize: 12)),
+            onTap: () => Navigator.pop(ctx),
+          ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+  }
+
+  /// 语言选择：简体中文 / English
+  void _showLanguagePicker(BuildContext context, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
+            child: Row(children: [
+              Text(l10n.settingsLanguage,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            ]),
+          ),
+          RadioGroup<String>(
+            groupValue: state.localeCode,
+            onChanged: (value) {
+              Navigator.pop(ctx);
+              if (value != null) state.setLocale(value);
+            },
+            child: const Column(mainAxisSize: MainAxisSize.min, children: [
+              RadioListTile<String>(
+                value: 'zh',
+                title: Text('简体中文'),
+                activeColor: AppTheme.primary,
+              ),
+              RadioListTile<String>(
+                value: 'en',
+                title: Text('English'),
+                activeColor: AppTheme.primary,
+              ),
+            ]),
+          ),
+          const SizedBox(height: 8),
         ]),
       ),
     );
@@ -140,14 +214,16 @@ class _TodaySection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     if (count == 0) {
       return SoftCard(
         padding: const EdgeInsets.all(20),
         child: Row(children: [
           const Icon(Icons.celebration_outlined, color: AppTheme.primary, size: 28),
           const SizedBox(width: 14),
-          const Expanded(child: Text('今天的事都处理完了，可以歇一歇',
-              style: TextStyle(fontSize: 15, color: AppTheme.ink))),
+          Expanded(
+              child: Text(l10n.dashAllDone,
+                  style: const TextStyle(fontSize: 15, color: AppTheme.ink))),
         ]),
       );
     }
@@ -157,23 +233,24 @@ class _TodaySection extends StatelessWidget {
         Row(children: [
           const Icon(Icons.notifications_active_outlined, color: AppTheme.expense, size: 20),
           const SizedBox(width: 6),
-          const Text('今天要处理', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+          Text(l10n.dashToday, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const Spacer(),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
             decoration: BoxDecoration(color: AppTheme.expense.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
-            child: Text('$count 件', style: const TextStyle(color: AppTheme.expense, fontSize: 12, fontWeight: FontWeight.w600)),
+            child: Text(l10n.dashTodoCountFmt(count),
+                style: const TextStyle(color: AppTheme.expense, fontSize: 12, fontWeight: FontWeight.w600)),
           ),
         ]),
         const SizedBox(height: 10),
         for (final p in overduePlans) _NeedRow(
-          icon: Icons.error_outline, text: '逾期：${p.title}',
+          icon: Icons.error_outline, text: l10n.dashOverdueFmt(p.title),
           tint: AppTheme.expense, onTap: onGoPlan),
         for (final p in undonePlans) _NeedRow(
-          icon: Icons.event, text: '今日：${p.title}',
+          icon: Icons.event, text: l10n.dashTodayItemFmt(p.title),
           tint: AppTheme.primary, onTap: onGoPlan),
         for (final s in todayShopping) _NeedRow(
-          icon: Icons.shopping_cart, text: '待买：${s.name} ×${s.quantity}',
+          icon: Icons.shopping_cart, text: l10n.dashToBuyFmt(s.name, s.quantity),
           tint: AppTheme.inkSecondary, onTap: onGoShopping),
       ]),
     );
@@ -227,19 +304,20 @@ class _ModuleGrid extends StatelessWidget {
   const _ModuleGrid({required this.state});
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final items = [
-      _M(label: '记账', icon: Icons.account_balance_wallet_outlined, color: AppTheme.expense,
-          sub: _summary('${state.moneyRecords.length} 条')),
-      _M(label: '习惯', icon: Icons.check_circle_outline, color: AppTheme.primary,
-          sub: _summary('${state.habits.length} 个习惯')),
-      _M(label: '减脂', icon: Icons.monitor_weight_outlined, color: AppTheme.income,
-          sub: _summary('${state.fitnessRecords.length} 条记录')),
-      _M(label: '日程', icon: Icons.event_note_outlined, color: AppTheme.inkSecondary,
-          sub: _summary('${state.planItems.length} 件事')),
-      _M(label: '待买', icon: Icons.shopping_cart_outlined, color: AppTheme.inkSecondary,
-          sub: _summary('${state.shoppingItems.where((s)=>!s.bought).length} 件待买')),
-      _M(label: '书影音', icon: Icons.collections_bookmark_outlined, color: AppTheme.inkSecondary,
-          sub: _summary('${state.mediaItems.length} 部')),
+      _M(label: l10n.navMoney, icon: Icons.account_balance_wallet_outlined, color: AppTheme.expense,
+          sub: l10n.dashModMoneyFmt(state.moneyRecords.length)),
+      _M(label: l10n.navHabits, icon: Icons.check_circle_outline, color: AppTheme.primary,
+          sub: l10n.dashModHabitFmt(state.habits.length)),
+      _M(label: l10n.navFitness, icon: Icons.monitor_weight_outlined, color: AppTheme.income,
+          sub: l10n.dashModFitnessFmt(state.fitnessRecords.length)),
+      _M(label: l10n.navPlan, icon: Icons.event_note_outlined, color: AppTheme.inkSecondary,
+          sub: l10n.dashModPlanFmt(state.planItems.length)),
+      _M(label: l10n.navShopping, icon: Icons.shopping_cart_outlined, color: AppTheme.inkSecondary,
+          sub: l10n.dashModShoppingFmt(state.shoppingItems.where((s) => !s.bought).length)),
+      _M(label: l10n.navMedia, icon: Icons.collections_bookmark_outlined, color: AppTheme.inkSecondary,
+          sub: l10n.dashModMediaFmt(state.mediaItems.length)),
     ];
     return GridView.count(
       crossAxisCount: 2,
@@ -259,7 +337,6 @@ class _ModuleGrid extends StatelessWidget {
       )).toList(),
     );
   }
-  static String _summary(String s) => s;
 }
 
 class _M {

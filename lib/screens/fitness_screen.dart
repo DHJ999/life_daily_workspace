@@ -5,6 +5,7 @@ import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../models/fitness_record.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// 减脂健身页 —— 体重体脂折线 + 7日均线 + BMI + 目标进度 + 热量缺口
 class FitnessScreen extends StatefulWidget {
@@ -24,9 +25,10 @@ class _FitnessScreenState extends State<FitnessScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('减脂健身'),
+        title: Text(l10n.fitnessTitle),
         actions: [
           IconButton(icon: const Icon(Icons.tune), onPressed: _showSettings),
           IconButton(icon: const Icon(Icons.add), onPressed: _showAddRecord),
@@ -35,6 +37,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
       body: ListenableBuilder(
         listenable: st,
         builder: (context, _) {
+          final l = AppLocalizations.of(context);
           final records = st.fitnessRecords;
           final latest = records.isEmpty ? null : records.last;
           final start = records.isEmpty ? null : records.first;
@@ -52,18 +55,18 @@ class _FitnessScreenState extends State<FitnessScreen> {
                   calorieGoal: _dailyCalorieGoal,
                 ),
               // 折线图
-              const SectionTitle('体重趋势（含 7 日均线）'),
+              SectionTitle(l.fitnessTrend),
               if (records.length >= 2)
                 SoftCard(padding: const EdgeInsets.all(12),
                   child: SizedBox(height: 180, child: CustomPaint(
                     painter: _WeightChartPainter(records),
                     child: const SizedBox.expand())))
               else
-                const EmptyState('至少录入 2 条体重记录后显示趋势'),
+                EmptyState(l.fitnessTrendHint),
               // 记录列表
-              const SectionTitle('记录'),
+              SectionTitle(l.commonRecord),
               if (records.isEmpty)
-                const EmptyState('还没有记录', hint: '点右上角 + 记录体重体脂')
+                EmptyState(l.fitnessEmpty, hint: l.fitnessEmptyHint)
               else
                 ...records.reversed.map((r) => _RecordRow(
                   r: r, onDelete: () => st.removeFitness(r.id))),
@@ -75,6 +78,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
   }
 
   void _showAddRecord() {
+    final l10n = AppLocalizations.of(context);
     final weightCtrl = TextEditingController();
     final fatCtrl = TextEditingController();
     final noteCtrl = TextEditingController();
@@ -88,15 +92,15 @@ class _FitnessScreenState extends State<FitnessScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('记录体重体脂', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(l10n.fitnessAddTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             TextField(controller: weightCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: '体重（kg）')),
+              decoration: InputDecoration(labelText: l10n.fitnessWeight)),
             const SizedBox(height: 12),
             TextField(controller: fatCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: '体脂率（%）')),
+              decoration: InputDecoration(labelText: l10n.fitnessBodyFat)),
             const SizedBox(height: 12),
-            TextField(controller: noteCtrl, decoration: const InputDecoration(labelText: '备注（可选）')),
+            TextField(controller: noteCtrl, decoration: InputDecoration(labelText: l10n.commonNote)),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, child: FilledButton(
               onPressed: () {
@@ -112,7 +116,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                 ));
                 Navigator.pop(ctx);
               },
-              child: const Text('保存'),
+              child: Text(l10n.commonSave),
             )),
           ]),
         ),
@@ -121,6 +125,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
   }
 
   void _showSettings() {
+    final l10n = AppLocalizations.of(context);
     final targetCtrl = TextEditingController(text: _targetWeight.toString());
     final heightCtrl = TextEditingController(text: _heightCm.toString());
     final calCtrl = TextEditingController(text: _dailyCalorieGoal.toString());
@@ -134,16 +139,16 @@ class _FitnessScreenState extends State<FitnessScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('目标设置', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(l10n.fitnessGoalTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             TextField(controller: targetCtrl, keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: '目标体重（kg）')),
+              decoration: InputDecoration(labelText: l10n.fitnessGoalWeight)),
             const SizedBox(height: 12),
             TextField(controller: heightCtrl, keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: '身高（cm，用于 BMI）')),
+              decoration: InputDecoration(labelText: l10n.fitnessHeight)),
             const SizedBox(height: 12),
             TextField(controller: calCtrl, keyboardType: TextInputType.number,
-              decoration: const InputDecoration(labelText: '每日热量目标（kcal）')),
+              decoration: InputDecoration(labelText: l10n.fitnessCalorie)),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, child: FilledButton(
               onPressed: () {
@@ -154,7 +159,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                 });
                 Navigator.pop(ctx);
               },
-              child: const Text('保存'),
+              child: Text(l10n.commonSave),
             )),
           ]),
         ),
@@ -172,9 +177,12 @@ class _GoalProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final bmi = heightCm > 0 ? current / ((heightCm / 100) * (heightCm / 100)) : 0;
     final bmiText = bmi.toStringAsFixed(1);
-    final bmiLabel = bmi < 18.5 ? '偏瘦' : (bmi < 24 ? '正常' : (bmi < 28 ? '偏胖' : '肥胖'));
+    final bmiLabel = bmi < 18.5
+        ? l10n.bmiThin
+        : (bmi < 24 ? l10n.bmiNormal : (bmi < 28 ? l10n.bmiOver : l10n.bmiObese));
     final bmiColor = bmi < 18.5 ? AppTheme.inkSecondary : (bmi < 24 ? AppTheme.income : (bmi < 28 ? AppTheme.expense : Colors.red));
 
     final startVal = start > target ? start - target : 0; // 需减
@@ -182,11 +190,14 @@ class _GoalProgress extends StatelessWidget {
 
     return SoftCard(padding: const EdgeInsets.all(18), child: Column(children: [
       Row(children: [
-        Expanded(child: _Metric(label: '当前体重', value: '${current.toStringAsFixed(1)} kg')),
+        Expanded(child: _Metric(label: l10n.fitnessCurWeight,
+            value: '${current.toStringAsFixed(1)} kg')),
         const SizedBox(width: 8),
-        Expanded(child: _Metric(label: 'BMI · $bmiLabel', value: bmiText, color: bmiColor)),
+        Expanded(child: _Metric(label: '${l10n.fitnessBmi} · $bmiLabel',
+            value: bmiText, color: bmiColor)),
         const SizedBox(width: 8),
-        Expanded(child: _Metric(label: '目标体重', value: '${target.toStringAsFixed(1)} kg')),
+        Expanded(child: _Metric(label: l10n.fitnessGoalWeightShort,
+            value: '${target.toStringAsFixed(1)} kg')),
       ]),
       const SizedBox(height: 16),
       ClipRRect(borderRadius: BorderRadius.circular(6),
@@ -194,9 +205,11 @@ class _GoalProgress extends StatelessWidget {
           backgroundColor: AppTheme.line, valueColor: const AlwaysStoppedAnimation(AppTheme.primary))),
       const SizedBox(height: 6),
       Row(children: [
-        Text('已达成 ${(progress * 100).toStringAsFixed(0)}%', style: const TextStyle(fontSize: 12, color: AppTheme.primary)),
+        Text(l10n.fitnessProgressFmt((progress * 100).round()),
+            style: const TextStyle(fontSize: 12, color: AppTheme.primary)),
         const Spacer(),
-        Text('热量目标 $calorieGoal kcal/日', style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
+        Text(l10n.fitnessCalorieGoalFmt(calorieGoal),
+            style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
       ]),
     ]));
   }
@@ -222,6 +235,7 @@ class _RecordRow extends StatelessWidget {
   const _RecordRow({required this.r, required this.onDelete});
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SoftCard(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(children: [
         const Icon(Icons.monitor_weight, color: AppTheme.primary, size: 20),
@@ -230,7 +244,8 @@ class _RecordRow extends StatelessWidget {
           Text('${r.weight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           if (r.note.isNotEmpty) Text(r.note, style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
         ])),
-        Text('体脂 ${r.bodyFat.toStringAsFixed(1)}%', style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
+        Text(l10n.fitnessFatFmt(r.bodyFat.toStringAsFixed(1)),
+            style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
         const SizedBox(width: 12),
         Text(r.date.substring(5), style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
         InkWell(onTap: onDelete, child: const Padding(padding: EdgeInsets.all(6), child: Icon(Icons.close, size: 16, color: AppTheme.inkSecondary))),

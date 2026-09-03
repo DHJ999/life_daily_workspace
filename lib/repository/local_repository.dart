@@ -78,4 +78,10 @@ class LocalRepository implements DataRepository {
   Future<void> saveMediaItems(List<MediaItem> items) async {
     await _store.writeMedia(items.map((i) => i.toJson()).toList());
   }
+
+  @override
+  Future<String?> loadLocale() => _store.readLocale();
+
+  @override
+  Future<void> saveLocale(String code) => _store.writeLocale(code);
 }

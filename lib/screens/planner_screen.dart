@@ -4,6 +4,8 @@ import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../models/plan_item.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/data_labels.dart';
 
 /// 日程统筹页 —— 按日期分组展示日程
 class PlannerScreen extends StatefulWidget {
@@ -26,14 +28,16 @@ class _PlannerScreenState extends State<PlannerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('日程统筹'),
+        title: Text(l10n.planTitle),
         actions: [IconButton(icon: const Icon(Icons.add), onPressed: _showAdd)],
       ),
       body: ListenableBuilder(
         listenable: st,
         builder: (context, _) {
+          final l = AppLocalizations.of(context);
           final items = st.planItems.where((p) => p.date == _selectedDate).toList();
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
@@ -66,9 +70,9 @@ class _PlannerScreenState extends State<PlannerScreen> {
               const SizedBox(height: 12),
               SectionTitle(_selectedDate!),
               if (items.isEmpty)
-                const EmptyState('这一天还没有日程')
+                EmptyState(l.planEmpty)
               else
-                for (final p in items) _PlanRow(p: p),
+                for (final p in items) _planRow(context, p: p),
             ],
           );
         },
@@ -76,7 +80,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
     );
   }
 
-  Widget _PlanRow({required PlanItem p}) {
+  Widget _planRow(BuildContext context, {required PlanItem p}) {
     final meta = PlanTypeMeta.of(p.type);
     return SoftCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
@@ -98,7 +102,8 @@ class _PlannerScreenState extends State<PlannerScreen> {
           style: TextStyle(fontSize: 15, fontWeight: FontWeight.w500,
             decoration: p.done ? TextDecoration.lineThrough : null,
             color: p.done ? AppTheme.inkSecondary : AppTheme.ink))),
-        Text(meta.name, style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
+        Text(DataLabels.planType(context, meta.name),
+            style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
         InkWell(onTap: () => st.removePlan(p.id),
           child: const Padding(padding: EdgeInsets.all(6), child: Icon(Icons.close, size: 16, color: AppTheme.inkSecondary))),
       ]),
@@ -106,6 +111,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
   }
 
   void _showAdd() {
+    final l10n = AppLocalizations.of(context);
     final titleCtrl = TextEditingController();
     final type = ValueNotifier<String>('一般');
     final date = ValueNotifier<String>(_selectedDate!);
@@ -121,11 +127,11 @@ class _PlannerScreenState extends State<PlannerScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('新增日程', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(l10n.planAddTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
-            TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: '事项')),
+            TextField(controller: titleCtrl, decoration: InputDecoration(labelText: l10n.planItemField)),
             const SizedBox(height: 12),
-            TextField(controller: dateCtrl, readOnly: true, decoration: const InputDecoration(labelText: '日期'),
+            TextField(controller: dateCtrl, readOnly: true, decoration: InputDecoration(labelText: l10n.planDate),
               onTap: () async {
                 final picked = await showDatePicker(
                   context: ctx, initialDate: DateTime.parse(date.value),
@@ -136,13 +142,13 @@ class _PlannerScreenState extends State<PlannerScreen> {
                 }
               }),
             const SizedBox(height: 12),
-            const Text('类型', style: TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
+            Text(l10n.planType, style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
             const SizedBox(height: 8),
             ValueListenableBuilder<String>(
               valueListenable: type,
               builder: (_, t, _) => Wrap(spacing: 8, runSpacing: 8,
                 children: [for (final m in PlanTypeMeta.all) ChoiceChip(
-                  label: Text(m.name, style: const TextStyle(fontSize: 13)),
+                  label: Text(DataLabels.planType(ctx, m.name), style: const TextStyle(fontSize: 13)),
                   selected: t == m.name,
                   onSelected: (_) => type.value = m.name,
                   selectedColor: AppTheme.primary,
@@ -162,7 +168,7 @@ class _PlannerScreenState extends State<PlannerScreen> {
                 ));
                 Navigator.pop(ctx);
               },
-              child: const Text('保存'),
+              child: Text(l10n.commonSave),
             )),
           ]),
         ),

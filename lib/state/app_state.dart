@@ -13,6 +13,13 @@ import '../repository/data_repository.dart';
 class AppState extends ChangeNotifier {
   final DataRepository repo;
   bool _loaded = false;
+  String _localeCode = 'zh'; // 界面语言：zh / en
+
+  /// 当前界面语言码（'zh' / 'en'）
+  String get localeCode => _localeCode;
+
+  /// 是否为简体中文界面
+  bool get isZh => _localeCode == 'zh';
 
   // 各模块数据
   final List<MoneyRecord> moneyRecords = [];
@@ -46,7 +53,18 @@ class AppState extends ChangeNotifier {
     mediaItems
       ..clear()
       ..addAll(await repo.loadMediaItems());
+    final savedLocale = await repo.loadLocale();
+    _localeCode = (savedLocale == 'en' || savedLocale == 'zh') ? savedLocale! : 'zh';
     _loaded = true;
+    notifyListeners();
+  }
+
+  /// 切换界面语言（'zh' / 'en'），即时生效并持久化
+  Future<void> setLocale(String code) async {
+    if (code != 'zh' && code != 'en') return;
+    if (_localeCode == code) return;
+    _localeCode = code;
+    await repo.saveLocale(code);
     notifyListeners();
   }
 

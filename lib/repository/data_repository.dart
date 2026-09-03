@@ -33,4 +33,9 @@ abstract class DataRepository {
   // ---- 书影音 ----
   Future<List<MediaItem>> loadMediaItems();
   Future<void> saveMediaItems(List<MediaItem> items);
+
+  // ---- 偏好设置 ----
+  /// 返回 'zh' / 'en'；未设置返回 null（由上层决定默认语言）
+  Future<String?> loadLocale();
+  Future<void> saveLocale(String code);
 }

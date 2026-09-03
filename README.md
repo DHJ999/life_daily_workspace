@@ -30,7 +30,8 @@
 - **状态管理**：Flutter 内置 `ChangeNotifier` + `InheritedWidget`，零第三方状态库（减小包体、降低维护成本）
 - **本地存储**：`shared_preferences`（KV 持久化，key 前缀 `wb_`）
 - **图表**：纯 `CustomPaint` 手绘（饼图 / 折线图 / 热力图），无外部图表库
-- **依赖**：仅 `shared_preferences` + `intl`，极简依赖面
+- **国际化**：官方 gen_l10n（`flutter_localizations` + ARB），首页右上角设置里可一键切换 **简体中文 / English**，选择即时生效并持久化
+- **依赖**：`shared_preferences` + `intl` + SDK 自带 `flutter_localizations`，极简依赖面
 
 ## 项目结构
 
@@ -51,7 +52,12 @@ lib/
 │   ├── data_repository.dart  # 抽象接口
 │   └── local_repository.dart # 本地实现
 ├── state/
-│   └── app_state.dart        # 全局状态 + 各模块数据增删改
+│   └── app_state.dart        # 全局状态 + locale + 各模块数据增删改
+├── l10n/                     # 国际化
+│   ├── app_zh.arb            # 简体中文文案源（template）
+│   ├── app_en.arb            # English 文案源
+│   ├── data_labels.dart      # 数据标签双语映射（分类/类型显示层翻译，不改存储值）
+│   └── generated/            # gen_l10n 生成的 AppLocalizations（随仓库提交）
 ├── screens/                  # 七屏（今日概览 + 六模块）
 └── widgets/
     └── common.dart           # SoftCard / SectionTitle / EmptyState / fmtMoney

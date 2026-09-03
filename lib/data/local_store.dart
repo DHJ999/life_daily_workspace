@@ -11,6 +11,7 @@ class LocalStore {
   static const String _kShopping = 'wb_shopping_items';
   static const String _kMedia = 'wb_media_items';
   static const String _kWeeklyPlan = 'wb_weekly_plan';
+  static const String _kLocale = 'wb_locale';
 
   /// 读一个 JSON 数组；不存在返回空列表
   Future<List<Map<String, dynamic>>> readList(String key) async {
@@ -53,6 +54,17 @@ class LocalStore {
 
   Future<List<Map<String, dynamic>>> readWeeklyPlan() => readList(_kWeeklyPlan);
   Future<void> writeWeeklyPlan(List<Map<String, dynamic>> list) => writeList(_kWeeklyPlan, list);
+
+  // ---- 偏好设置 ----
+  Future<String?> readLocale() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getString(_kLocale);
+  }
+
+  Future<void> writeLocale(String code) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setString(_kLocale, code);
+  }
 
   /// 清空全部数据
   Future<void> clearAll() async {

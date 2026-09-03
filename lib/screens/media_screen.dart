@@ -3,6 +3,7 @@ import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../models/media_item.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// 书影音收藏页 —— 封面墙/列表两种视图 + 状态 + 星级 + 短评 + 年度统计
 class MediaScreen extends StatefulWidget {
@@ -15,16 +16,16 @@ class MediaScreen extends StatefulWidget {
 
 class _MediaScreenState extends State<MediaScreen> {
   bool _grid = true;
-  String _filter = '全部';
-  AppState get st => widget.state;
+  MediaStatus? _filter; // null = 全部
 
-  static const _statusOptions = ['全部', '想看', '在看', '看过'];
+  AppState get st => widget.state;
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('书影音'),
+        title: Text(l10n.mediaTitle),
         actions: [
           IconButton(icon: Icon(_grid ? Icons.view_list : Icons.grid_view),
             onPressed: () => setState(() => _grid = !_grid)),
@@ -34,9 +35,10 @@ class _MediaScreenState extends State<MediaScreen> {
       body: ListenableBuilder(
         listenable: st,
         builder: (context, _) {
+          final l = AppLocalizations.of(context);
           final items = st.mediaItems.where((m) {
-            if (_filter == '全部') return true;
-            return m.status.name == _filter;
+            if (_filter == null) return true;
+            return m.status == _filter;
           }).toList();
           // 年度统计
           final year = DateTime.now().year;
@@ -47,26 +49,37 @@ class _MediaScreenState extends State<MediaScreen> {
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
             children: [
               SoftCard(padding: const EdgeInsets.all(16), child: Row(children: [
-                _Stat(label: '收藏总数', value: '${st.mediaItems.length}'),
+                _stat(label: l.mediaStatTotal, value: '${st.mediaItems.length}'),
                 const SizedBox(width: 8),
-                _Stat(label: '已看完', value: '$watched'),
+                _stat(label: l.mediaStatFinished, value: '$watched'),
                 const SizedBox(width: 8),
-                _Stat(label: '$year 观影', value: '$thisYear'),
+                _stat(label: l.mediaStatYearFmt(year), value: '$thisYear'),
               ])),
               const SizedBox(height: 12),
               SizedBox(height: 40, child: ListView(scrollDirection: Axis.horizontal,
-                children: [for (final f in _statusOptions) Padding(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(label: Text(l.commonAll),
+                      selected: _filter == null,
+                      onSelected: (_) => setState(() => _filter = null),
+                      selectedColor: AppTheme.primary,
+                      backgroundColor: AppTheme.surface,
+                      labelStyle: TextStyle(color: _filter == null ? Colors.white : AppTheme.inkSecondary, fontSize: 13),
+                      side: const BorderSide(color: AppTheme.line)),
+                  ),
+                  for (final s in MediaStatus.values) Padding(
                   padding: const EdgeInsets.only(right: 8),
-                  child: ChoiceChip(label: Text(f), selected: _filter == f,
-                    onSelected: (_) => setState(() => _filter = f),
+                  child: ChoiceChip(label: Text(statusLabel(l, s)), selected: _filter == s,
+                    onSelected: (_) => setState(() => _filter = s),
                     selectedColor: AppTheme.primary,
                     backgroundColor: AppTheme.surface,
-                    labelStyle: TextStyle(color: _filter == f ? Colors.white : AppTheme.inkSecondary, fontSize: 13),
+                    labelStyle: TextStyle(color: _filter == s ? Colors.white : AppTheme.inkSecondary, fontSize: 13),
                     side: const BorderSide(color: AppTheme.line)),
                 )])),
               const SizedBox(height: 12),
               if (items.isEmpty)
-                const EmptyState('还没有收藏', hint: '点右上角 + 添加')
+                EmptyState(l.mediaEmpty, hint: l.mediaEmptyHint)
               else if (_grid)
                 GridView.count(crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(),
                   mainAxisSpacing: 12, crossAxisSpacing: 12, childAspectRatio: 0.78,
@@ -80,14 +93,29 @@ class _MediaScreenState extends State<MediaScreen> {
     );
   }
 
-  Widget _Stat({required String label, required String value}) {
+  Widget _stat({required String label, required String value}) {
     return Expanded(child: Column(children: [
       Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: AppTheme.ink)),
       Text(label, style: const TextStyle(fontSize: 11, color: AppTheme.inkSecondary)),
     ]));
   }
 
+  /// 状态显示文案（按界面语言）
+  static String statusLabel(AppLocalizations l10n, MediaStatus s) => switch (s) {
+        MediaStatus.want => l10n.mediaStatusWant,
+        MediaStatus.watching => l10n.mediaStatusWatching,
+        MediaStatus.watched => l10n.mediaStatusFinished,
+      };
+
+  static String typeLabel(AppLocalizations l10n, MediaType t) => switch (t) {
+        MediaType.book => l10n.mediaTypeBook,
+        MediaType.movie => l10n.mediaTypeMovie,
+        MediaType.series => l10n.mediaTypeSeries,
+        MediaType.anime => l10n.mediaTypeAnime,
+      };
+
   void _showAdd() {
+    final l10n = AppLocalizations.of(context);
     final titleCtrl = TextEditingController();
     final type = ValueNotifier<MediaType>(MediaType.book);
     final status = ValueNotifier<MediaStatus>(MediaStatus.want);
@@ -104,16 +132,16 @@ class _MediaScreenState extends State<MediaScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('添加收藏', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(l10n.mediaAddTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
-            TextField(controller: titleCtrl, decoration: const InputDecoration(labelText: '标题')),
+            TextField(controller: titleCtrl, decoration: InputDecoration(labelText: l10n.mediaTitleField)),
             const SizedBox(height: 12),
-            const Text('类型', style: TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
+            Text(l10n.mediaType, style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
             const SizedBox(height: 8),
             ValueListenableBuilder<MediaType>(valueListenable: type,
               builder: (_, t, _) => Wrap(spacing: 8, children: [
                 for (final e in MediaTypeMeta.map.entries) ChoiceChip(
-                  label: Text(e.value.label, style: const TextStyle(fontSize: 13)),
+                  label: Text(typeLabel(l10n, e.key), style: const TextStyle(fontSize: 13)),
                   selected: t == e.key, onSelected: (_) => type.value = e.key,
                   selectedColor: AppTheme.primary,
                   labelStyle: TextStyle(color: t == e.key ? Colors.white : AppTheme.inkSecondary),
@@ -121,12 +149,12 @@ class _MediaScreenState extends State<MediaScreen> {
                 ),
               ])),
             const SizedBox(height: 12),
-            const Text('状态', style: TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
+            Text(l10n.mediaStatus, style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
             const SizedBox(height: 8),
             ValueListenableBuilder<MediaStatus>(valueListenable: status,
               builder: (_, s, _) => Wrap(spacing: 8, children: [
                 for (final opt in MediaStatus.values) ChoiceChip(
-                  label: Text(_statusLabel(opt), style: const TextStyle(fontSize: 13)),
+                  label: Text(statusLabel(l10n, opt), style: const TextStyle(fontSize: 13)),
                   selected: s == opt, onSelected: (_) => status.value = opt,
                   selectedColor: AppTheme.primary,
                   labelStyle: TextStyle(color: s == opt ? Colors.white : AppTheme.inkSecondary),
@@ -136,14 +164,14 @@ class _MediaScreenState extends State<MediaScreen> {
             const SizedBox(height: 12),
             ValueListenableBuilder<double>(valueListenable: rating,
               builder: (_, r, _) => Row(children: [
-                const Text('评分', style: TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
+                Text(l10n.mediaRating, style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
                 const SizedBox(width: 8),
                 for (int i = 1; i <= 5; i++)
                   IconButton(icon: Icon(i <= r.round() ? Icons.star : Icons.star_border,
                     color: AppTheme.expense, size: 26),
                     onPressed: () => rating.value = i.toDouble()),
               ])),
-            TextField(controller: reviewCtrl, decoration: const InputDecoration(labelText: '短评（可选）'),
+            TextField(controller: reviewCtrl, decoration: InputDecoration(labelText: l10n.mediaReview),
               maxLines: 3),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, child: FilledButton(
@@ -156,16 +184,13 @@ class _MediaScreenState extends State<MediaScreen> {
                 ));
                 Navigator.pop(ctx);
               },
-              child: const Text('保存'),
+              child: Text(l10n.commonSave),
             )),
           ]),
         ),
       ),
     );
   }
-
-  static String _statusLabel(MediaStatus s) =>
-      s == MediaStatus.want ? '想看' : (s == MediaStatus.watching ? '在看' : '看过');
 }
 
 class _CoverCard extends StatelessWidget {
@@ -174,6 +199,7 @@ class _CoverCard extends StatelessWidget {
   const _CoverCard({required this.m, required this.onDelete});
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final meta = MediaTypeMeta.of(m.type);
     return SoftCard(padding: const EdgeInsets.all(12), child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
       // 封面占位（用类型色块 + 首字，避免外链）
@@ -187,7 +213,8 @@ class _CoverCard extends StatelessWidget {
         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600))),
       const SizedBox(height: 2),
       Row(children: [
-        Text(meta.label, style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
+        Text(_MediaScreenState.typeLabel(l10n, m.type),
+            style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
         const Spacer(),
         for (int i = 0; i < 5; i++)
           Icon(i < m.rating.round() ? Icons.star : Icons.star_border, size: 12, color: AppTheme.expense),
@@ -208,6 +235,7 @@ class _ListRow extends StatelessWidget {
   const _ListRow({required this.m, required this.onDelete});
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final meta = MediaTypeMeta.of(m.type);
     return SoftCard(padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(children: [
@@ -222,7 +250,8 @@ class _ListRow extends StatelessWidget {
             style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
           const SizedBox(height: 2),
           Row(children: [
-            Text(meta.label, style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
+            Text(_MediaScreenState.typeLabel(l10n, m.type),
+                style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
             const SizedBox(width: 6),
             for (int i = 0; i < 5; i++)
               Icon(i < m.rating.round() ? Icons.star : Icons.star_border, size: 11, color: AppTheme.expense),
@@ -239,12 +268,12 @@ class _StatusTag extends StatelessWidget {
   const _StatusTag(this.status);
   @override
   Widget build(BuildContext context) {
-    final map = {
-      MediaStatus.want: (const Color(0xFF888780), '想看'),
-      MediaStatus.watching: (AppTheme.primary, '在看'),
-      MediaStatus.watched: (AppTheme.expense, '看过'),
+    final l10n = AppLocalizations.of(context);
+    final (color, label) = switch (status) {
+      MediaStatus.want => (const Color(0xFF888780), l10n.mediaStatusWant),
+      MediaStatus.watching => (AppTheme.primary, l10n.mediaStatusWatching),
+      MediaStatus.watched => (AppTheme.expense, l10n.mediaStatusFinished),
     };
-    final (color, label) = map[status]!;
     return Container(padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(20)),
       child: Text(label, style: TextStyle(fontSize: 11, color: color)));

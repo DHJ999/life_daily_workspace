@@ -1,12 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'data/local_store.dart';
 import 'repository/local_repository.dart';
 import 'state/app_state.dart';
 import 'theme.dart';
 import 'screens/home_shell.dart';
+import 'l10n/generated/app_localizations.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // 预加载中文日期符号（英文为 intl 内建，无需加载），供 DateFormat(..., 'zh') 使用
+  try {
+    await initializeDateFormatting('zh');
+  } catch (_) {}
   runApp(const LifeDailyApp());
 }
 
@@ -32,11 +38,18 @@ class LifeDailyApp extends StatelessWidget {
         final state = snapshot.data!;
         return AppScope(
           state: state,
-          child: MaterialApp(
-            title: '日常集 · 生活工作台',
-            debugShowCheckedModeBanner: false,
-            theme: AppTheme.light(),
-            home: const HomeShell(),
+          // 监听 AppState：语言切换时重建 MaterialApp，locale 即时生效
+          child: ListenableBuilder(
+            listenable: state,
+            builder: (context, _) => MaterialApp(
+              title: state.isZh ? '日常集 · 生活工作台' : 'LifeDaily · Life Workbench',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.light(),
+              locale: state.isZh ? const Locale('zh') : const Locale('en'),
+              supportedLocales: AppLocalizations.supportedLocales,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              home: const HomeShell(),
+            ),
           ),
         );
       },

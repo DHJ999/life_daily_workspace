@@ -4,6 +4,8 @@ import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../models/money_record.dart';
+import '../l10n/generated/app_localizations.dart';
+import '../l10n/data_labels.dart';
 
 /// 记账理财页
 class MoneyScreen extends StatefulWidget {
@@ -16,7 +18,7 @@ class MoneyScreen extends StatefulWidget {
 
 class _MoneyScreenState extends State<MoneyScreen> {
   String _month = DateFormat('yyyy-MM').format(DateTime.now());
-  String _categoryFilter = '全部';
+  String _categoryFilter = ''; // '' 表示全部（避免存中文常量）
 
   AppState get st => widget.state;
 
@@ -24,13 +26,14 @@ class _MoneyScreenState extends State<MoneyScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final monthRecords = _monthRecords;
     final income = monthRecords.where((r) => r.flow == FlowType.income).fold(0.0, (a, r) => a + r.amount);
     final expense = monthRecords.where((r) => r.flow == FlowType.expense).fold(0.0, (a, r) => a + r.amount);
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('记账理财'),
+        title: Text(l10n.moneyTitle),
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: _showAddSheet),
         ],
@@ -38,6 +41,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
       body: ListenableBuilder(
         listenable: st,
         builder: (context, _) {
+          final l = AppLocalizations.of(context);
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
             children: [
@@ -50,31 +54,34 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 padding: const EdgeInsets.all(18),
                 child: Column(children: [
                   Row(children: [
-                    Expanded(child: _MoneyCol(label: '本月支出', value: expense, color: AppTheme.expense)),
-                    Expanded(child: _MoneyCol(label: '本月收入', value: income, color: AppTheme.income)),
-                    Expanded(child: _MoneyCol(label: '结余', value: income - expense, color: AppTheme.primary)),
+                    Expanded(child: _MoneyCol(label: l.moneyMonthExpense, value: expense, color: AppTheme.expense)),
+                    Expanded(child: _MoneyCol(label: l.moneyMonthIncome, value: income, color: AppTheme.income)),
+                    Expanded(child: _MoneyCol(label: l.moneyBalance, value: income - expense, color: AppTheme.primary)),
                   ]),
                   const SizedBox(height: 16),
                   _ExpensePie(records: monthRecords.where((r) => r.flow == FlowType.expense).toList()),
                 ]),
               ),
               const SizedBox(height: 8),
-              // 分类筛选
+              // 分类筛选（'' 表示全部；显示走双语映射，值用存储 key）
               SizedBox(
                 height: 44,
                 child: ListView(
                   scrollDirection: Axis.horizontal,
                   children: [
-                    _chip('全部'),
-                    for (final c in MoneyCategory.expenseCategories) _chip(c.name),
-                    for (final c in MoneyCategory.incomeCategories) _chip(c.name),
+                    _chip(l.commonAll, ''),
+                    for (final c in MoneyCategory.expenseCategories)
+                      _chip(DataLabels.moneyCategory(context, c.name), c.name),
+                    for (final c in MoneyCategory.incomeCategories)
+                      _chip(DataLabels.moneyCategory(context, c.name), c.name),
                   ],
                 ),
               ),
               const SizedBox(height: 4),
               // 记录列表
-              ..._recordList(monthRecords),
-              if (monthRecords.isEmpty) const EmptyState('本月还没有记录', hint: '点右上角 + 记一笔'),
+              ..._recordList(context, monthRecords),
+              if (monthRecords.isEmpty)
+                EmptyState(l.moneyEmptyMonth, hint: l.moneyEmptyMonthHint),
             ],
           );
         },
@@ -82,14 +89,15 @@ class _MoneyScreenState extends State<MoneyScreen> {
     );
   }
 
-  Widget _chip(String name) {
-    final active = _categoryFilter == name;
+  /// 显示用分类名：筛选值 ''（全部）或自定义时原样，预设分类走双语映射
+  Widget _chip(String display, String value) {
+    final active = _categoryFilter == value;
     return Padding(
       padding: const EdgeInsets.only(right: 8),
       child: ChoiceChip(
-        label: Text(name),
+        label: Text(display),
         selected: active,
-        onSelected: (_) => setState(() => _categoryFilter = name),
+        onSelected: (_) => setState(() => _categoryFilter = value),
         selectedColor: AppTheme.primary,
         backgroundColor: AppTheme.surface,
         labelStyle: TextStyle(
@@ -100,12 +108,13 @@ class _MoneyScreenState extends State<MoneyScreen> {
     );
   }
 
-  List<Widget> _recordList(List<MoneyRecord> all) {
-    final filtered = _categoryFilter == '全部'
+  List<Widget> _recordList(BuildContext context, List<MoneyRecord> all) {
+    final l10n = AppLocalizations.of(context);
+    final filtered = _categoryFilter.isEmpty
         ? all
         : all.where((r) => r.category == _categoryFilter).toList();
     filtered.sort((a, b) => b.date.compareTo(a.date));
-    if (filtered.isEmpty) return [const EmptyState('该分类暂无记录')];
+    if (filtered.isEmpty) return [EmptyState(l10n.moneyEmptyCat)];
     return filtered.map((r) {
       final cat = MoneyCategory.fromName(r.category, flow: r.flow);
       final isIn = r.flow == FlowType.income;
@@ -116,7 +125,8 @@ class _MoneyScreenState extends State<MoneyScreen> {
             child: Icon(cat.icon, size: 18, color: cat.color)),
           const SizedBox(width: 12),
           Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(r.category, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
+            Text(DataLabels.moneyCategory(context, r.category),
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w500)),
             if (r.note.isNotEmpty) Text(r.note, style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
           ])),
           Text(r.date.substring(5).replaceAll('-', '/'),
@@ -142,8 +152,9 @@ class _MoneyScreenState extends State<MoneyScreen> {
   }
 
   void _showAddSheet() {
+    final l10n = AppLocalizations.of(context);
     final flow = ValueNotifier<FlowType>(FlowType.expense);
-    final category = ValueNotifier<String>('餐饮');
+    final category = ValueNotifier<String>(MoneyCategory.expenseCategories.first.name); // '餐饮'
     final amountCtrl = TextEditingController();
     final noteCtrl = TextEditingController();
 
@@ -157,7 +168,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('记一笔', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(l10n.moneyAddTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
             // 收支切换
             ValueListenableBuilder<FlowType>(
@@ -165,14 +176,20 @@ class _MoneyScreenState extends State<MoneyScreen> {
               builder: (_, f, _) => Row(children: [
                 Expanded(child: FilledButton(
                   style: FilledButton.styleFrom(backgroundColor: f == FlowType.expense ? AppTheme.expense : AppTheme.line),
-                  onPressed: () { flow.value = FlowType.expense; category.value = '餐饮'; },
-                  child: const Text('支出'),
+                  onPressed: () {
+                    flow.value = FlowType.expense;
+                    category.value = MoneyCategory.expenseCategories.first.name;
+                  },
+                  child: Text(l10n.moneyExpense),
                 )),
                 const SizedBox(width: 12),
                 Expanded(child: FilledButton(
                   style: FilledButton.styleFrom(backgroundColor: f == FlowType.income ? AppTheme.income : AppTheme.line),
-                  onPressed: () { flow.value = FlowType.income; category.value = '工资'; },
-                  child: const Text('收入'),
+                  onPressed: () {
+                    flow.value = FlowType.income;
+                    category.value = MoneyCategory.incomeCategories.first.name;
+                  },
+                  child: Text(l10n.moneyIncome),
                 )),
               ]),
             ),
@@ -187,7 +204,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                     ValueListenableBuilder<String>(
                       valueListenable: category,
                       builder: (_, cur, _) => ChoiceChip(
-                        label: Text(c.name),
+                        label: Text(DataLabels.moneyCategory(ctx, c.name)),
                         selected: cur == c.name,
                         onSelected: (_) => category.value = c.name,
                         selectedColor: f == FlowType.income ? AppTheme.income : AppTheme.expense,
@@ -200,9 +217,9 @@ class _MoneyScreenState extends State<MoneyScreen> {
             ),
             const SizedBox(height: 16),
             TextField(controller: amountCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true),
-              decoration: const InputDecoration(labelText: '金额', prefixText: '¥ ')),
+              decoration: InputDecoration(labelText: l10n.moneyAmount, prefixText: '¥ ')),
             const SizedBox(height: 12),
-            TextField(controller: noteCtrl, decoration: const InputDecoration(labelText: '备注（可选）')),
+            TextField(controller: noteCtrl, decoration: InputDecoration(labelText: l10n.commonNote)),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, child: FilledButton(
               onPressed: () {
@@ -218,7 +235,7 @@ class _MoneyScreenState extends State<MoneyScreen> {
                 ));
                 Navigator.pop(ctx);
               },
-              child: const Text('保存'),
+              child: Text(l10n.commonSave),
             )),
           ]),
         ),
@@ -268,6 +285,7 @@ class _ExpensePie extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (records.isEmpty) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context);
     // 按分类聚合
     final Map<String, double> byCat = {};
     var total = 0.0;
@@ -280,7 +298,7 @@ class _ExpensePie extends StatelessWidget {
       ..sort((a, b) => b.value.compareTo(a.value));
     // 图例
     return Column(children: [
-      const Text('消费结构', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+      Text(l10n.moneyPieTitle, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
       const SizedBox(height: 8),
       Row(children: [
         SizedBox(width: 120, height: 120,
@@ -293,7 +311,8 @@ class _ExpensePie extends StatelessWidget {
                 Container(width: 10, height: 10, decoration: BoxDecoration(
                   color: colors[byCat.keys.toList().indexOf(e.key)], shape: BoxShape.circle)),
                 const SizedBox(width: 8),
-                Expanded(child: Text(e.key, style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)),
+                Expanded(child: Text(DataLabels.moneyCategory(context, e.key),
+                    style: const TextStyle(fontSize: 13), overflow: TextOverflow.ellipsis)),
                 Text('${(e.value / total * 100).toStringAsFixed(0)}%',
                     style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
               ])),

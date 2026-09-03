@@ -3,6 +3,7 @@ import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../models/shopping_item.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// 待买清单页
 class ShoppingScreen extends StatefulWidget {
@@ -19,14 +20,16 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('待买清单'),
+        title: Text(l10n.shopTitle),
         actions: [IconButton(icon: const Icon(Icons.add), onPressed: _showAdd)],
       ),
       body: ListenableBuilder(
         listenable: st,
         builder: (context, _) {
+          final l = AppLocalizations.of(context);
           final items = st.shoppingItems.where((s) => _showBought ? true : !s.bought).toList();
           final total = items.where((s) => !s.bought).fold(0.0, (a, s) => a + s.totalPrice);
           return ListView(
@@ -36,7 +39,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                 child: Row(children: [
                   const Icon(Icons.receipt_long_outlined, color: AppTheme.primary),
                   const SizedBox(width: 12),
-                  Text('待买合计', style: const TextStyle(fontSize: 14, color: AppTheme.inkSecondary)),
+                  Text(l.shopTotal, style: const TextStyle(fontSize: 14, color: AppTheme.inkSecondary)),
                   const Spacer(),
                   Text(fmtMoney(total), style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
                 ])),
@@ -44,14 +47,15 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
               SwitchListTile(
                 value: _showBought,
                 onChanged: (v) => setState(() => _showBought = v),
-                title: const Text('显示已买', style: TextStyle(fontSize: 14)),
+                title: Text(l.shopShowBought, style: const TextStyle(fontSize: 14)),
                 activeThumbColor: AppTheme.primary,
                 contentPadding: EdgeInsets.zero,
               ),
               if (items.isEmpty)
-                EmptyState(_showBought ? '还没有已买记录' : '待买清单是空的', hint: '点右上角 + 加一件')
+                EmptyState(_showBought ? l.shopEmptyBought : l.shopEmptyTodo,
+                    hint: l.shopEmptyHint)
               else
-                for (final s in items) _ItemRow(s: s),
+                for (final s in items) _itemRow(s: s),
             ],
           );
         },
@@ -59,7 +63,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
     );
   }
 
-  Widget _ItemRow({required ShoppingItem s}) {
+  Widget _itemRow({required ShoppingItem s}) {
+    final l10n = AppLocalizations.of(context);
     return SoftCard(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       child: Row(children: [
@@ -76,7 +81,8 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
           if (s.note.isNotEmpty) Text(s.note, style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
         ])),
         Column(crossAxisAlignment: CrossAxisAlignment.end, children: [
-          Text('${s.quantity} 件', style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
+          Text(l10n.shopQtyFmt(s.quantity),
+              style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
           Text(fmtMoney(s.totalPrice), style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
         ]),
         InkWell(onTap: () => st.removeShopping(s.id),
@@ -86,6 +92,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
   }
 
   void _showAdd() {
+    final l10n = AppLocalizations.of(context);
     final nameCtrl = TextEditingController();
     final qtyCtrl = TextEditingController(text: '1');
     final priceCtrl = TextEditingController();
@@ -100,19 +107,19 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-            const Text('加一件', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(l10n.shopAddTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
-            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: '物品名称')),
+            TextField(controller: nameCtrl, decoration: InputDecoration(labelText: l10n.shopName)),
             const SizedBox(height: 12),
             Row(children: [
               Expanded(child: TextField(controller: qtyCtrl, keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '数量'))),
+                decoration: InputDecoration(labelText: l10n.shopQuantity))),
               const SizedBox(width: 12),
               Expanded(child: TextField(controller: priceCtrl, keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: const InputDecoration(labelText: '预估单价', prefixText: '¥ '))),
+                decoration: InputDecoration(labelText: l10n.shopPrice, prefixText: '¥ '))),
             ]),
             const SizedBox(height: 12),
-            TextField(controller: noteCtrl, decoration: const InputDecoration(labelText: '备注（可选）')),
+            TextField(controller: noteCtrl, decoration: InputDecoration(labelText: l10n.commonNote)),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, child: FilledButton(
               onPressed: () {
@@ -126,7 +133,7 @@ class _ShoppingScreenState extends State<ShoppingScreen> {
                 ));
                 Navigator.pop(ctx);
               },
-              child: const Text('保存'),
+              child: Text(l10n.commonSave),
             )),
           ]),
         ),

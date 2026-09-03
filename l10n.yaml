@@ -1,0 +1,8 @@
+# gen_l10n 配置：控制 arb 本地化资源的代码生成
+# 生成物输出到 lib/l10n/generated（源码目录，随仓库维护），
+# 避免依赖 .dart_tool 合成包（该目录不入库，克隆后需重新生成）
+arb-dir: lib/l10n
+template-arb-file: app_zh.arb
+output-localization-file: app_localizations.dart
+output-dir: lib/l10n/generated
+nullable-getter: false

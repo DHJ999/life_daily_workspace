@@ -4,6 +4,7 @@ import '../state/app_state.dart';
 import '../theme.dart';
 import '../widgets/common.dart';
 import '../models/habit.dart';
+import '../l10n/generated/app_localizations.dart';
 
 /// 习惯健康页 —— 习惯列表 + 30 天热力图 + 三种打卡方式
 class HabitsScreen extends StatelessWidget {
@@ -14,9 +15,10 @@ class HabitsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('习惯健康'),
+        title: Text(l10n.habitsTitle),
         actions: [
           IconButton(icon: const Icon(Icons.add), onPressed: () => _showAddHabit(context)),
         ],
@@ -24,13 +26,14 @@ class HabitsScreen extends StatelessWidget {
       body: ListenableBuilder(
         listenable: state,
         builder: (context, _) {
+          final l = AppLocalizations.of(context);
           if (state.habits.isEmpty) {
-            return const EmptyState('还没有习惯', hint: '点右上角 + 新建一个习惯');
+            return EmptyState(l.habitsEmpty, hint: l.habitsEmptyHint);
           }
           return ListView(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 90),
             children: [
-              const SectionTitle('我的习惯'),
+              SectionTitle(l.habitsMy),
               for (final h in state.habits) _HabitCard(
                 habit: h,
                 today: _today,
@@ -38,7 +41,7 @@ class HabitsScreen extends StatelessWidget {
                 onDelete: () => state.removeHabit(h.id),
               ),
               const SizedBox(height: 8),
-              const SectionTitle('30 天热力图'),
+              SectionTitle(l.habitsHeat),
               _Heatmap(habits: state.habits),
             ],
           );
@@ -48,6 +51,7 @@ class HabitsScreen extends StatelessWidget {
   }
 
   void _showAddHabit(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final nameCtrl = TextEditingController();
     final targetCtrl = TextEditingController(text: '1');
     final type = ValueNotifier<HabitType>(HabitType.check);
@@ -63,28 +67,30 @@ class HabitsScreen extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(20),
           child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
-            const Text('新建习惯', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            Text(l10n.habitsAddTitle, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
             const SizedBox(height: 16),
-            TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: '习惯名称', hintText: '如：早起、喝水、跑步')),
+            TextField(controller: nameCtrl,
+                decoration: InputDecoration(labelText: l10n.habitsName, hintText: l10n.habitsNameHint)),
             const SizedBox(height: 12),
-            const Text('打卡方式', style: TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
+            Text(l10n.habitsTypeLabel, style: const TextStyle(fontSize: 13, color: AppTheme.inkSecondary)),
             const SizedBox(height: 8),
             ValueListenableBuilder<HabitType>(
               valueListenable: type,
               builder: (_, t, _) => Row(children: [
-                _typeChip('勾选', HabitType.check, t, type),
+                _typeChip(l10n.habitsChipCheck, HabitType.check, t, type),
                 const SizedBox(width: 8),
-                _typeChip('计数', HabitType.counter, t, type),
+                _typeChip(l10n.habitsChipCounter, HabitType.counter, t, type),
                 const SizedBox(width: 8),
-                _typeChip('数值', HabitType.value, t, type),
+                _typeChip(l10n.habitsChipValue, HabitType.value, t, type),
               ]),
             ),
             const SizedBox(height: 12),
             Row(children: [
               Expanded(child: TextField(controller: targetCtrl, keyboardType: TextInputType.number,
-                decoration: const InputDecoration(labelText: '目标'))),
+                decoration: InputDecoration(labelText: l10n.habitsTarget))),
               const SizedBox(width: 12),
-              Expanded(child: TextField(controller: unitCtrl, decoration: const InputDecoration(labelText: '单位（可选）'))),
+              Expanded(child: TextField(controller: unitCtrl,
+                  decoration: InputDecoration(labelText: l10n.habitsUnit))),
             ]),
             const SizedBox(height: 20),
             SizedBox(width: double.infinity, child: FilledButton(
@@ -100,7 +106,7 @@ class HabitsScreen extends StatelessWidget {
                 ));
                 Navigator.pop(ctx);
               },
-              child: const Text('创建'),
+              child: Text(l10n.habitsCreate),
             )),
           ]),
         ),
@@ -129,6 +135,24 @@ class _HabitCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final zh = Localizations.localeOf(context).languageCode == 'zh';
+
+    // 类型文案
+    final typeLabel = switch (habit.type) {
+      HabitType.check => l10n.habitsDoneStatus,
+      HabitType.counter => l10n.habitsChipCounter,
+      HabitType.value => l10n.habitsChipValue,
+    };
+
+    // 目标文本：check 固定 1 次/1 time；counter/value 显示数值 + 单位
+    final targetText = () {
+      final unit = habit.unit.isEmpty ? '' : ' ${habit.unit}';
+      if (habit.type == HabitType.check) return zh ? '1 次$unit' : '1 time$unit';
+      final num = habit.target.toStringAsFixed(habit.target % 1 == 0 ? 0 : 1);
+      return '$num$unit';
+    }();
+
     return SoftCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       child: Row(children: [
@@ -139,19 +163,14 @@ class _HabitCard extends StatelessWidget {
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(habit.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
           const SizedBox(height: 2),
-          Text('${habit.type == HabitType.check ? '完成/未完成' : (habit.type == HabitType.counter ? '计数' : '数值')} · 目标 ${_targetStr()} · 连续 ${habit.streakDays()} 天',
+          Text(
+              '$typeLabel · ${l10n.habitsTargetFmt(targetText)} · ${l10n.habitsStreakFmt(habit.streakDays())}',
               style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
         ])),
         _checkControl(),
         InkWell(onTap: onDelete, child: const Padding(padding: EdgeInsets.all(6), child: Icon(Icons.delete_outline, size: 18, color: AppTheme.inkSecondary))),
       ]),
     );
-  }
-
-  String _targetStr() {
-    final unit = habit.unit.isEmpty ? '' : ' ${habit.unit}';
-    if (habit.type == HabitType.check) return '1 次$unit';
-    return '${habit.target.toStringAsFixed(habit.target % 1 == 0 ? 0 : 1)}$unit';
   }
 
   Widget _checkControl() {
@@ -189,6 +208,7 @@ class _Heatmap extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     // 计算每天总完成率
     final today = DateTime.now();
     final days = List.generate(30, (i) {
@@ -209,22 +229,24 @@ class _Heatmap extends StatelessWidget {
             return Container(
               width: 22, height: 22,
               decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(4)),
-              child: Tooltip(message: '${d.date} ${(d.pct * 100).toStringAsFixed(0)}%',
+              child: Tooltip(
+                  message: l10n.heatTooltipFmt(
+                      d.date, (d.pct * 100).toStringAsFixed(0)),
                   child: const SizedBox.expand()),
             );
           }).toList(),
         ),
         const SizedBox(height: 10),
         Row(children: [
-          const Text('少', style: TextStyle(fontSize: 11, color: AppTheme.inkSecondary)),
+          Text(l10n.heatLow, style: const TextStyle(fontSize: 11, color: AppTheme.inkSecondary)),
           const SizedBox(width: 4),
           for (final c in [0.0, 0.25, 0.5, 0.75, 1.0])
             Container(width: 14, height: 14, margin: const EdgeInsets.only(right: 3),
               decoration: BoxDecoration(color: _heatColor(c), borderRadius: BorderRadius.circular(3))),
           const SizedBox(width: 4),
-          const Text('多', style: TextStyle(fontSize: 11, color: AppTheme.inkSecondary)),
+          Text(l10n.heatHigh, style: const TextStyle(fontSize: 11, color: AppTheme.inkSecondary)),
           const Spacer(),
-          const Text('近 30 天', style: TextStyle(fontSize: 11, color: AppTheme.inkSecondary)),
+          Text(l10n.heatLast30, style: const TextStyle(fontSize: 11, color: AppTheme.inkSecondary)),
         ]),
       ]),
     );
