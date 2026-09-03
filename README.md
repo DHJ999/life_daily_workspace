@@ -72,7 +72,10 @@ lib/
 # 国内镜像（推荐，写入 shell 或环境变量）
 export PUB_HOSTED_URL=https://pub.flutter-io.cn
 export FLUTTER_STORAGE_BASE_URL=https://storage.flutter-io.cn
-export GRADLE_USER_HOME=/d/.gradle
+# Gradle 缓存目录：Windows 下必须写带盘符的绝对路径
+# 写成 /d/.gradle 会被解析成「当前盘符 + /d/.gradle」，
+# 在 E 盘的项目里执行时实际生成的是 E:\d\.gradle，而不是 D 盘的缓存目录。
+export GRADLE_USER_HOME="D:/.gradle"
 export ANDROID_HOME="D:/Android/Sdk"
 export JAVA_HOME="D:/Android/Android Studio/jbr"
 
