@@ -1,0 +1,13 @@
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+Running Gradle task 'assembleRelease'...                        
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by net.rubygrapefruit.platform.internal.NativeLibraryLoader in an unnamed module (file:/E:/d/.gradle/wrapper/dists/gradle-9.1.0-all/2x09zxy9y9fz2e9j6blrf3xag/gradle-9.1.0/lib/native-platform-0.22-milestone-28.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+Flutter assets will be downloaded from https://storage.flutter-io.cn. Make sure you trust this source!
+Font asset "MaterialIcons-Regular.otf" was tree-shaken, reducing it from 1645184 to 8464 bytes (99.5% reduction). Tree-shaking can be disabled by providing the --no-tree-shake-icons flag when building your app.
+Running Gradle task 'assembleRelease'...                          396.7s
+√ Built build\app\outputs\flutter-apk\app-armeabi-v7a-release.apk (14.5MB)
+√ Built build\app\outputs\flutter-apk\app-arm64-v8a-release.apk (17.0MB)
+√ Built build\app\outputs\flutter-apk\app-x86_64-release.apk (18.4MB)
