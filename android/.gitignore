@@ -12,3 +12,6 @@ GeneratedPluginRegistrant.java
 key.properties
 **/*.keystore
 **/*.jks
+
+# 本地签名备忘（含精确路径/别名，仅本机保留，严禁入库）
+/SIGNING-INFO.local.md

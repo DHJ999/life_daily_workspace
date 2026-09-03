@@ -99,11 +99,11 @@ flutter build ios
 
 ### 正式签名（重要）
 
-- 密钥库：`android/app/upload-keystore.jks`（RSA 2048，有效期 10000 天，别名 `upload`）
-- 密码与别名配置：`android/key.properties`（已加入 `.gitignore`，不会入库）
-- Gradle 配置：`android/app/build.gradle.kts` 中 `signingConfigs.release` 已启用正式签名
+- release 包使用正式签名构建（`android/app/build.gradle.kts` 中 `signingConfigs.release` 已启用）。
+- 密钥库与密码配置文件的**完整说明见本机文件 `android/SIGNING-INFO.local.md`**（该文件不入库、不随仓库分发，仅机主本机保留）。
+- 密钥相关文件（`.jks` / `key.properties` 等）均已加入 `.gitignore`，不会进入版本库。
 
-> ⚠️ **请务必备份 `upload-keystore.jks` 和 `key.properties`。**
+> ⚠️ **请务必备份密钥库文件（见上述本地备忘）。**
 > 密钥库一旦丢失，将无法为已发布的 App 提供后续更新（签名不一致无法覆盖安装）。
 
 ### 历史产物
