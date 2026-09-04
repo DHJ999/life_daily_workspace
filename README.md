@@ -274,3 +274,7 @@ flutter analyze                      # Static analysis (currently no errors/warn
 2. **iOS build**: Integrate a macOS build environment and ship a TestFlight build
 3. **Data export**: Full data export to JSON for backup / restore
 4. **Desktop widgets**: Quick-entry for expense tracking and a habit-check-in desktop widget
+
+## License
+
+This project is open-sourced under the [MIT License](LICENSE). Copyright © 2026 DHJ999.
