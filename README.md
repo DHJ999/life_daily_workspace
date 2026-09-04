@@ -3,6 +3,17 @@
 > 一体式生活记录 App：记账理财 / 习惯健康 / 减脂健身 / 日程统筹 / 待买清单 / 书影音收藏。
 > 纯本地优先、离线可用、包体小、启动快，架构预留云端同步。
 
+<p align="center">
+  <a href="https://polyformproject.org/licenses/noncommercial/1.0.0/"><img src="https://img.shields.io/badge/license-PolyForm%20Noncommercial%201.0.0-0000FF.svg" alt="PolyForm Noncommercial 1.0.0"></a>
+  <a href="https://flutter.dev"><img src="https://img.shields.io/badge/Flutter-3.44-02569B?logo=flutter&logoColor=white" alt="Flutter 3.44"></a>
+  <a href="https://dart.dev"><img src="https://img.shields.io/badge/Dart-3.12-0175C2?logo=dart&logoColor=white" alt="Dart 3.12"></a>
+  <a href="https://www.android.com/"><img src="https://img.shields.io/badge/-Android-3DDC84?logo=android&logoColor=white" alt="Android"></a>
+  <a href="https://www.apple.com/ios/"><img src="https://img.shields.io/badge/-iOS-000000?logo=apple&logoColor=white" alt="iOS"></a>
+  <a href="https://github.com/DHJ999/life_daily_workspace/releases"><img src="https://img.shields.io/github/v/release/DHJ999/life_daily_workspace" alt="GitHub Release"></a>
+  <a href="https://github.com/DHJ999/life_daily_workspace"><img src="https://img.shields.io/github/stars/DHJ999/life_daily_workspace" alt="GitHub Stars"></a>
+  <a href="https://github.com/DHJ999/life_daily_workspace/commits/main"><img src="https://img.shields.io/github/last-commit/DHJ999/life_daily_workspace" alt="Last Commit"></a>
+</p>
+
 🌐 **Languages / 多语言**：[🇨🇳 中文版](#这是什么) · [🇬🇧 English version](#what-is-this)
 
 ---
@@ -12,7 +23,7 @@
 「日常集」把日常生活里最常见的六类记录收进一个 App，避免装一堆各自为政的小工具。
 打开即用、随手就记，界面克制干净，图表全部手绘实现，不依赖任何第三方图表库。
 
-**当前版本：v1.0.0（versionCode 1）** · 平台：Android（iOS 代码同库，待接 macOS 构建环境）
+**当前版本：v1.0.1（versionCode 2）** · 平台：Android（iOS 代码同库，待接 macOS 构建环境）
 
 ## 功能模块
 
@@ -138,6 +149,10 @@ flutter analyze                      # 静态分析（当前无 error/warning）
 3. **数据导出**：全量数据导出 JSON 备份 / 恢复
 4. **桌面小组件**：记账快捷入口、习惯打卡桌面插件
 
+## 许可协议
+
+本项目采用 **PolyForm Noncommercial License 1.0.0**（源码可得许可，非 OSI 开源协议；全文见 [LICENSE](LICENSE)，官方文本见 [polyformproject.org](https://polyformproject.org/licenses/noncommercial/1.0.0/)）：允许任何**非商业**目的的使用、修改与再分发；商业用途需另行取得授权。Copyright © 2026 DHJ999。
+
 ---
 
 # 日常集 · Life Workbench (English)
@@ -152,7 +167,7 @@ flutter analyze                      # 静态分析（当前无 error/warning）
 DailyHub consolidates the six most common types of daily records into a single app, so you don't have to install a pile of scattered standalone tools.
 It's ready to use the moment you open it — just jot things down. The UI is clean and restrained, and every chart is hand-drawn with no third-party charting library.
 
-**Current version: v1.0.0 (versionCode 1)** · Platform: Android (iOS code lives in the same repo; awaits a macOS build environment)
+**Current version: v1.0.1 (versionCode 2)** · Platform: Android (iOS code lives in the same repo; awaits a macOS build environment)
 
 ## Features
 
@@ -277,4 +292,4 @@ flutter analyze                      # Static analysis (currently no errors/warn
 
 ## License
 
-This project is open-sourced under the [MIT License](LICENSE). Copyright © 2026 DHJ999.
+This project is licensed under the **PolyForm Noncommercial License 1.0.0** (a source-available license, not an OSI-approved open-source license; full text in [LICENSE](LICENSE), official text at [polyformproject.org](https://polyformproject.org/licenses/noncommercial/1.0.0/)): use, modification and redistribution are permitted for any **noncommercial** purpose; commercial use requires a separate license from the licensor. Copyright © 2026 DHJ999.
