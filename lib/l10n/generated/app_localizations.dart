@@ -865,6 +865,72 @@ abstract class AppLocalizations {
   /// In zh, this message translates to:
   /// **'动漫'**
   String get mediaTypeAnime;
+
+  /// No description provided for @agreeIntro.
+  ///
+  /// In zh, this message translates to:
+  /// **'开始使用前，请先阅读并同意以下条款。本应用为纯本地工具：不注册账号、不联网，您的数据仅保存在本机。'**
+  String get agreeIntro;
+
+  /// No description provided for @docUserAgreement.
+  ///
+  /// In zh, this message translates to:
+  /// **'《用户协议》'**
+  String get docUserAgreement;
+
+  /// No description provided for @docPrivacyPolicy.
+  ///
+  /// In zh, this message translates to:
+  /// **'《隐私政策》'**
+  String get docPrivacyPolicy;
+
+  /// No description provided for @agreeReadBefore.
+  ///
+  /// In zh, this message translates to:
+  /// **'我已阅读并同意'**
+  String get agreeReadBefore;
+
+  /// No description provided for @agreeReadAnd.
+  ///
+  /// In zh, this message translates to:
+  /// **'与'**
+  String get agreeReadAnd;
+
+  /// No description provided for @agreeActionAgree.
+  ///
+  /// In zh, this message translates to:
+  /// **'同意并继续'**
+  String get agreeActionAgree;
+
+  /// No description provided for @agreeActionDisagree.
+  ///
+  /// In zh, this message translates to:
+  /// **'不同意'**
+  String get agreeActionDisagree;
+
+  /// No description provided for @agreeExitTitle.
+  ///
+  /// In zh, this message translates to:
+  /// **'需要同意才能使用'**
+  String get agreeExitTitle;
+
+  /// No description provided for @agreeExitMsg.
+  ///
+  /// In zh, this message translates to:
+  /// **'只有同意《用户协议》与《隐私政策》后才能使用本应用。您可以重新打开应用，阅读条款后点击「同意并继续」。'**
+  String get agreeExitMsg;
+
+  /// No description provided for @agreeExitAction.
+  ///
+  /// In zh, this message translates to:
+  /// **'退出应用'**
+  String get agreeExitAction;
+
+  /// No description provided for @settingsAgreement.
+  ///
+  /// In zh, this message translates to:
+  /// **'协议与隐私'**
+  String get settingsAgreement;
 }
 
 class _AppLocalizationsDelegate

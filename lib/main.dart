@@ -5,6 +5,7 @@ import 'repository/local_repository.dart';
 import 'state/app_state.dart';
 import 'theme.dart';
 import 'screens/home_shell.dart';
+import 'screens/agreement/agreement_gate.dart';
 import 'l10n/generated/app_localizations.dart';
 
 Future<void> main() async {
@@ -48,7 +49,8 @@ class LifeDailyApp extends StatelessWidget {
               locale: state.isZh ? const Locale('zh') : const Locale('en'),
               supportedLocales: AppLocalizations.supportedLocales,
               localizationsDelegates: AppLocalizations.localizationsDelegates,
-              home: const HomeShell(),
+              // 未同意《用户协议》/《隐私政策》时先展示首启确认页
+              home: state.agreed ? const HomeShell() : const AgreementGate(),
             ),
           ),
         );

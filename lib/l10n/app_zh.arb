@@ -155,5 +155,17 @@
   "mediaTypeBook": "书籍",
   "mediaTypeMovie": "电影",
   "mediaTypeSeries": "电视剧",
-  "mediaTypeAnime": "动漫"
+  "mediaTypeAnime": "动漫",
+
+  "agreeIntro": "开始使用前，请先阅读并同意以下条款。本应用为纯本地工具：不注册账号、不联网，您的数据仅保存在本机。",
+  "docUserAgreement": "《用户协议》",
+  "docPrivacyPolicy": "《隐私政策》",
+  "agreeReadBefore": "我已阅读并同意",
+  "agreeReadAnd": "与",
+  "agreeActionAgree": "同意并继续",
+  "agreeActionDisagree": "不同意",
+  "agreeExitTitle": "需要同意才能使用",
+  "agreeExitMsg": "只有同意《用户协议》与《隐私政策》后才能使用本应用。您可以重新打开应用，阅读条款后点击「同意并继续」。",
+  "agreeExitAction": "退出应用",
+  "settingsAgreement": "协议与隐私"
 }

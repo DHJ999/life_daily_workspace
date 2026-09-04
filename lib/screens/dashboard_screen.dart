@@ -7,6 +7,8 @@ import '../models/money_record.dart';
 import '../models/plan_item.dart';
 import '../models/shopping_item.dart';
 import '../l10n/generated/app_localizations.dart';
+import 'agreement/agreement_doc_page.dart';
+import 'agreement/agreement_docs.dart';
 import 'planner_screen.dart';
 import 'shopping_screen.dart';
 
@@ -92,7 +94,21 @@ class DashboardScreen extends StatelessWidget {
     );
   }
 
-  /// 设置面板：语言切换 / 数据存储 / 关于
+  /// 打开协议文档页（用户协议 / 隐私政策）
+  void _openDoc(BuildContext context, {required bool privacy}) {
+    final l10n = AppLocalizations.of(context);
+    final zh = state.isZh;
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => AgreementDocPage(
+        title: privacy ? l10n.docPrivacyPolicy : l10n.docUserAgreement,
+        sections: privacy
+            ? privacyPolicySections(zh: zh)
+            : userAgreementSections(zh: zh),
+      ),
+    ));
+  }
+
+  /// 设置面板：语言切换 / 数据存储 / 协议与隐私 / 关于
   void _showSettings(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     showModalBottomSheet(
@@ -100,6 +116,7 @@ class DashboardScreen extends StatelessWidget {
       backgroundColor: AppTheme.surface,
       shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (ctx) => SafeArea(
+        child: SingleChildScrollView(
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 18, 20, 6),
@@ -122,6 +139,32 @@ class DashboardScreen extends StatelessWidget {
             onTap: () => Navigator.pop(ctx),
           ),
           const Divider(height: 1),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 2),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(l10n.settingsAgreement,
+                  style: const TextStyle(fontSize: 12, color: AppTheme.inkSecondary)),
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.menu_book_outlined, color: AppTheme.primary),
+            title: Text(l10n.docUserAgreement, style: const TextStyle(fontSize: 15)),
+            onTap: () {
+              Navigator.pop(ctx);
+              _openDoc(context, privacy: false);
+            },
+          ),
+          const Divider(height: 1),
+          ListTile(
+            leading: const Icon(Icons.privacy_tip_outlined, color: AppTheme.primary),
+            title: Text(l10n.docPrivacyPolicy, style: const TextStyle(fontSize: 15)),
+            onTap: () {
+              Navigator.pop(ctx);
+              _openDoc(context, privacy: true);
+            },
+          ),
+          const Divider(height: 1),
           ListTile(
             leading: const Icon(Icons.info_outline),
             title: Text(l10n.settingsAbout),
@@ -130,6 +173,7 @@ class DashboardScreen extends StatelessWidget {
           ),
           const SizedBox(height: 8),
         ]),
+        ),
       ),
     );
   }

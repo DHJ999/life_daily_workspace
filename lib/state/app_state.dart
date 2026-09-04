@@ -14,12 +14,16 @@ class AppState extends ChangeNotifier {
   final DataRepository repo;
   bool _loaded = false;
   String _localeCode = 'zh'; // 界面语言：zh / en
+  bool _agreed = false; // 是否已同意《用户协议》与《隐私政策》
 
   /// 当前界面语言码（'zh' / 'en'）
   String get localeCode => _localeCode;
 
   /// 是否为简体中文界面
   bool get isZh => _localeCode == 'zh';
+
+  /// 是否已同意《用户协议》与《隐私政策》（决定是否展示首启确认页）
+  bool get agreed => _agreed;
 
   // 各模块数据
   final List<MoneyRecord> moneyRecords = [];
@@ -55,7 +59,16 @@ class AppState extends ChangeNotifier {
       ..addAll(await repo.loadMediaItems());
     final savedLocale = await repo.loadLocale();
     _localeCode = (savedLocale == 'en' || savedLocale == 'zh') ? savedLocale! : 'zh';
+    _agreed = await repo.loadAgreed();
     _loaded = true;
+    notifyListeners();
+  }
+
+  /// 记录用户同意协议（首次同意后持久化，下次启动不再弹确认页）
+  Future<void> setAgreed() async {
+    if (_agreed) return;
+    _agreed = true;
+    await repo.saveAgreed(true);
     notifyListeners();
   }
 

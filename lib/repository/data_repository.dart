@@ -38,4 +38,8 @@ abstract class DataRepository {
   /// 返回 'zh' / 'en'；未设置返回 null（由上层决定默认语言）
   Future<String?> loadLocale();
   Future<void> saveLocale(String code);
+
+  /// 用户是否已同意《用户协议》与《隐私政策》
+  Future<bool> loadAgreed();
+  Future<void> saveAgreed(bool agreed);
 }

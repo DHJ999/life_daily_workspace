@@ -429,4 +429,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get mediaTypeAnime => 'Anime';
+
+  @override
+  String get agreeIntro =>
+      'Before you start, please read and agree to the terms below. This app is fully offline: no account, no network access, and your data stays on this device.';
+
+  @override
+  String get docUserAgreement => 'User Agreement';
+
+  @override
+  String get docPrivacyPolicy => 'Privacy Policy';
+
+  @override
+  String get agreeReadBefore => 'I have read and agree to the ';
+
+  @override
+  String get agreeReadAnd => ' and the ';
+
+  @override
+  String get agreeActionAgree => 'Agree & Continue';
+
+  @override
+  String get agreeActionDisagree => 'Disagree';
+
+  @override
+  String get agreeExitTitle => 'Consent required';
+
+  @override
+  String get agreeExitMsg =>
+      'You need to accept the User Agreement and Privacy Policy to use this app. Reopen the app and tap “Agree & Continue” after reading the terms.';
+
+  @override
+  String get agreeExitAction => 'Exit App';
+
+  @override
+  String get settingsAgreement => 'Agreements & Privacy';
 }

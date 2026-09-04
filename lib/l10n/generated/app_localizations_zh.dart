@@ -427,4 +427,38 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get mediaTypeAnime => '动漫';
+
+  @override
+  String get agreeIntro => '开始使用前，请先阅读并同意以下条款。本应用为纯本地工具：不注册账号、不联网，您的数据仅保存在本机。';
+
+  @override
+  String get docUserAgreement => '《用户协议》';
+
+  @override
+  String get docPrivacyPolicy => '《隐私政策》';
+
+  @override
+  String get agreeReadBefore => '我已阅读并同意';
+
+  @override
+  String get agreeReadAnd => '与';
+
+  @override
+  String get agreeActionAgree => '同意并继续';
+
+  @override
+  String get agreeActionDisagree => '不同意';
+
+  @override
+  String get agreeExitTitle => '需要同意才能使用';
+
+  @override
+  String get agreeExitMsg =>
+      '只有同意《用户协议》与《隐私政策》后才能使用本应用。您可以重新打开应用，阅读条款后点击「同意并继续」。';
+
+  @override
+  String get agreeExitAction => '退出应用';
+
+  @override
+  String get settingsAgreement => '协议与隐私';
 }

@@ -155,5 +155,17 @@
   "mediaTypeBook": "Book",
   "mediaTypeMovie": "Movie",
   "mediaTypeSeries": "Series",
-  "mediaTypeAnime": "Anime"
+  "mediaTypeAnime": "Anime",
+
+  "agreeIntro": "Before you start, please read and agree to the terms below. This app is fully offline: no account, no network access, and your data stays on this device.",
+  "docUserAgreement": "User Agreement",
+  "docPrivacyPolicy": "Privacy Policy",
+  "agreeReadBefore": "I have read and agree to the ",
+  "agreeReadAnd": " and the ",
+  "agreeActionAgree": "Agree & Continue",
+  "agreeActionDisagree": "Disagree",
+  "agreeExitTitle": "Consent required",
+  "agreeExitMsg": "You need to accept the User Agreement and Privacy Policy to use this app. Reopen the app and tap \u201cAgree & Continue\u201d after reading the terms.",
+  "agreeExitAction": "Exit App",
+  "settingsAgreement": "Agreements & Privacy"
 }

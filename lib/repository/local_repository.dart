@@ -84,4 +84,10 @@ class LocalRepository implements DataRepository {
 
   @override
   Future<void> saveLocale(String code) => _store.writeLocale(code);
+
+  @override
+  Future<bool> loadAgreed() => _store.readAgreed();
+
+  @override
+  Future<void> saveAgreed(bool agreed) => _store.writeAgreed(agreed);
 }

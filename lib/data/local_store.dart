@@ -12,6 +12,7 @@ class LocalStore {
   static const String _kMedia = 'wb_media_items';
   static const String _kWeeklyPlan = 'wb_weekly_plan';
   static const String _kLocale = 'wb_locale';
+  static const String _kAgreed = 'wb_agreed';
 
   /// 读一个 JSON 数组；不存在返回空列表
   Future<List<Map<String, dynamic>>> readList(String key) async {
@@ -64,6 +65,17 @@ class LocalStore {
   Future<void> writeLocale(String code) async {
     final sp = await SharedPreferences.getInstance();
     await sp.setString(_kLocale, code);
+  }
+
+  /// 用户是否已同意《用户协议》与《隐私政策》
+  Future<bool> readAgreed() async {
+    final sp = await SharedPreferences.getInstance();
+    return sp.getBool(_kAgreed) ?? false;
+  }
+
+  Future<void> writeAgreed(bool agreed) async {
+    final sp = await SharedPreferences.getInstance();
+    await sp.setBool(_kAgreed, agreed);
   }
 
   /// 清空全部数据
