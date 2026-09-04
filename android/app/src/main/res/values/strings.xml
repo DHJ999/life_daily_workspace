@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Default (Chinese, and fallback for any non-matching locale) -->
+    <string name="app_name">日常集</string>
+</resources>
